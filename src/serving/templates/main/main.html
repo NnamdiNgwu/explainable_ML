@@ -1,185 +1,130 @@
 {% extends 'layouts/base.html'%}
 
-
 {% block contentA %}
- <div class="dashboard">
-        <div class="sidebar">
-            <h2>🔍 ML Dashboard</h2>
-            <div class="nav-item active" onclick="showTab('overview')">📊 Overview</div>
-            <div class="nav-item" onclick="showTab('features')">🎯 Feature Analysis</div>
-            <div class="nav-item" onclick="showTab('prediction')">🔮 Live Prediction</div>
-            <div class="nav-item" onclick="showTab('comparison')">⚖️ Model Comparison</div>
-            <div class="nav-item" onclick="showTab('explanations')">💡 Explanations</div>
+<div class="dashboard">
+    <div class="sidebar">
+        <h2>🛡️ Security Dashboard</h2>
+        <div class="nav-item active" onclick="showTab('prediction')">🔮 Live Prediction</div>
+        <div class="nav-item" onclick="showTab('batch')">📤 Batch Upload</div>
+        <div class="nav-item" onclick="showTab('explanations')">💡 Explanations</div>
+        <!-- Disabled until backend endpoints exist -->
+        <!-- <div class="nav-item" onclick="showTab('overview')">📊 Overview</div>
+        <div class="nav-item" onclick="showTab('features')">🎯 Features</div>
+        <div class="nav-item" onclick="showTab('comparison')">⚖️ Comparison</div> -->
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>🛡️ Explainable Risk Scoring</h1>
+            <div style="color: #666;">Cascade RF → Transformer with SHAP Explanations</div>
         </div>
-        
-        <div class="main-content">
-            <div class="header">
-                <h1>Machine Learning Explainability Dashboard</h1>
-                <div style="color: #666;">Real-time Model Insights & Analysis</div>
-            </div>
-            
-            <!-- Overview Tab -->
-            <div id="overview" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card primary">
-                        <div class="stat-value" id="totalPredictions">-</div>
-                        <div class="stat-label">Total Predictions</div>
-                    </div>
-                    <div class="stat-card danger">
-                        <div class="stat-value" id="highRiskRate">-</div>
-                        <div class="stat-label">High Risk Rate</div>
-                    </div>
-                    <div class="stat-card success">
-                        <div class="stat-value" id="avgConfidence">-</div>
-                        <div class="stat-label">Avg Confidence</div>
-                    </div>
-                    <div class="stat-card warning">
-                        <div class="stat-value" id="rfUsage">-</div>
-                        <div class="stat-label">RF Usage</div>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-title">Model Distribution</div>
-                    <canvas id="modelDistributionChart" width="400" height="200"></canvas>
-                </div>
-                
-                <div class="chart-container">
-                    <div class="chart-title">System Health</div>
-                    <div id="systemHealth">Loading...</div>
-                </div>
-            </div>
 {% endblock contentA %}
 
 {% block contentB %}
-<!-- Feature Analysis Tab -->
-            <div id="features" class="tab-content" style="display: none;">
-                <div class="chart-container">
-                    <div class="chart-title">Global Feature Importance (Random Forest)</div>
-                    <canvas id="featureImportanceChart" width="400" height="300"></canvas>
+        <!-- Live Prediction Tab -->
+        <div id="prediction" class="tab-content" style="display: block;">
+            <div class="prediction-panel">
+                <div class="input-form">
+                    <h3>📝 Enter Event Data</h3>
+                    <form id="predictionForm">
+                        <div class="form-group">
+                            <label>File Size (MB)</label>
+                            <input type="number" name="megabytes_sent" value="25.8" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hour (0-23)</label>
+                            <input type="number" name="hour" value="23" min="0" max="23" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Destination Domain</label>
+                            <input type="text" name="destination_domain" value="external.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel</label>
+                            <select name="channel" required>
+                                <option value="HTTP">HTTP</option>
+                                <option value="EMAIL">EMAIL</option>
+                                <option value="USB">USB</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>First Time Destination?</label>
+                            <select name="first_time_destination" required>
+                                <option value="false">No</option>
+                                <option value="true" selected>Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>After Hours?</label>
+                            <select name="after_hours" required>
+                                <option value="false">No</option>
+                                <option value="true" selected>Yes</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            🔍 Predict Risk
+                        </button>
+                    </form>
                 </div>
                 
-                <div class="chart-container">
-                    <div class="chart-title">Feature Categories Analysis</div>
-                    <canvas id="featureCategoriesChart" width="400" height="200"></canvas>
+                <div class="results-panel">
+                    <h3>⚡ Prediction Results</h3>
+                    <div id="predictionResults" style="padding: 20px; color: #999;">
+                        Submit a prediction to see results
+                    </div>
                 </div>
             </div>
-            
-            <!-- Live Prediction Tab -->
-            <div id="prediction" class="tab-content" style="display: none;">
-                <div class="prediction-panel">
-                    <div class="input-form">
-                        <h3>Input Event Data</h3>
-                        <form id="predictionForm">
-                            <div class="form-group">
-                                <label>File Size (MB)</label>
-                                <input type="number" name="megabytes_sent" value="5.2" step="0.1">
-                            </div>
-                            <div class="form-group">
-                                <label>Hour (0-23)</label>
-                                <input type="number" name="hour" value="14" min="0" max="23">
-                            </div>
-                            <div class="form-group">
-                                <label>Destination Domain</label>
-                                <input type="text" name="destination_domain" value="company.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Channel</label>
-                                <select name="channel">
-                                    <option value="HTTP">HTTP</option>
-                                    <option value="EMAIL">EMAIL</option>
-                                    <option value="USB">USB</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>First Time Destination</label>
-                                <select name="first_time_destination">
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>After Hours</label>
-                                <select name="after_hours">
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn">🔍 Predict Risk</button>
-                        </form>
-                    </div>
+        </div>
+
+        <!-- Batch Upload Tab -->
+        <div id="batch" class="tab-content" style="display: none;">
+            <div class="batch-panel">
+                <div style="padding: 20px;">
+                    <h3>📤 Batch Upload & Predict</h3>
+                    <p style="color: #666; margin: 12px 0;">Upload CSV or JSON file with multiple events for batch processing.</p>
                     
-                    <div class="results-panel">
-                        <h3>Prediction Results</h3>
-                        <div id="predictionResults">
-                            <div class="loading">Submit a prediction to see results</div>
+                    <div style="margin: 20px 0; padding: 24px; border: 2px dashed #667eea; border-radius: 8px; text-align: center; cursor: pointer; background: #f8f9ff;">
+                        <input type="file" id="batchUploadForm" accept=".csv,.json" style="display: none;">
+                        <div onclick="document.getElementById('batchUploadForm').click();" style="cursor: pointer;">
+                            📁 Click to upload or drag & drop
+                            <p style="font-size: 12px; color: #999; margin-top: 8px;">CSV or JSON (max 1000 events)</p>
                         </div>
                     </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>📋 Expected Format (CSV):</h4>
+                        <pre style="background: #f5f5f5; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px;">megabytes_sent,hour,destination_domain,channel,first_time_destination,after_hours
+25.8,23,external.com,HTTP,true,true
+0.5,10,internal.com,SFTP,false,false
+100.2,2,dropbox.com,HTTP,true,true</pre>
+                    </div>
                 </div>
-
-                <div class="chart-container">
-                    <div class="chart-title">SHAP Waterfall Plot</div>
-                    <div id="shapWaterfall"></div>
+                
+                <div id="batchResults" style="padding: 20px; margin-top: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <p style="color: #999;">Upload a file to see results</p>
                 </div>
             </div>
+        </div>
 {% endblock contentB %}
 
 {% block contentC %}
- <!-- Model Comparison Tab -->
-            <div id="comparison" class="tab-content" style="display: none;">
-                <div class="input-form" style="margin-bottom: 20px;">
-                    <h3>Compare RF vs Transformer</h3>
-                    <button onclick="runModelComparison()" class="btn">🔄 Run Comparison</button>
+        <!-- Explanations Tab -->
+        <div id="explanations" class="tab-content" style="display: none;">
+            <div class="chart-container">
+                <div class="chart-title">
+                    🔍 AI Explainability
+                    <span class="risk-badge" id="confidenceBadge" style="float: right;">Confidence: -</span>
                 </div>
                 
-                <div id="modelComparison">
-                    <div class="model-result">
-                        <h4>🌳 Random Forest</h4>
-                        <div id="rfResults">Run comparison to see results</div>
-                    </div>
-                    <div class="model-result">
-                        <h4>🤖 Transformer</h4>
-                        <div id="transformerResults">Run comparison to see results</div>
-                    </div>
+                <div id="shapFactors" class="feature-list" style="margin: 20px 0;">
+                    <p style="color: #999;">Make a prediction to see feature contributions</p>
                 </div>
                 
-                <div class="chart-container" style="margin-top: 20px;">
-                    <div class="chart-title">Feature Importance Comparison</div>
-                    <canvas id="comparisonChart" width="400" height="300"></canvas>
-                </div>
-            </div>
-{% endblock contentC %}
-
-{% block contentD %}
-<!-- Explanations Tab -->
-            <div id="explanations" class="tab-content" style="display: none;">
-                <div class="tabs">
-                    <div class="tab active" onclick="showExplanationMethod('shap')">SHAP Analysis</div>
-                    <div class="tab" onclick="showExplanationMethod('captum')">Captum Analysis</div>
-                    <div class="tab" onclick="showExplanationMethod('attention')">Attention Weights</div>
-                </div>
-                
-                <div id="shapExplanation" class="explanation-content">
-                    <div class="chart-container">
-                        <div class="chart-title">SHAP Feature Importance</div>
-                        <div id="shapPlot"></div>
-                    </div>
-                </div>
-                
-                <div id="captumExplanation" class="explanation-content" style="display: none;">
-                    <div class="chart-container">
-                        <div class="chart-title">Integrated Gradients</div>
-                        <div id="captumPlot"></div>
-                    </div>
-                </div>
-                
-                <div id="attentionExplanation" class="explanation-content" style="display: none;">
-                    <div class="chart-container">
-                        <div class="chart-title">Attention Weights</div>
-                        <div id="attentionPlot"></div>
-                    </div>
+                <div class="explanation-summary">
+                    <p id="whyFlagged">Run a prediction to see explanation...</p>
                 </div>
             </div>
         </div>
     </div>
-{% endblock contentD %}
+</div>
+{% endblock contentC %}

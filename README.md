@@ -134,6 +134,16 @@ Tune
 2
 ​	
 
+cd /explainable_architectural_transfer/src
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+
+cd /explainable_architectural_transfer
+pip install -r requirements.txt
+
+python -m flask --app src.serving.app run
+
 # To run a test
  curl -X POST http://localhost:5000/api/v1/predict \
   -H "Content-Type: application/json" \

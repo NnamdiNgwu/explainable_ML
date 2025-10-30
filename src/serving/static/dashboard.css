@@ -246,3 +246,76 @@
             border-color: #667eea;
             background: #f8f9ff;
         }
+
+        /* Add these to your existing file */
+
+.help-icon {
+  display: inline-block;
+  cursor: help;
+  margin-left: 8px;
+  font-size: 14px;
+  color: #666;
+  position: relative;
+}
+
+.help-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  z-index: 1000;
+}
+
+.shap-bar-container {
+  position: relative;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.shap-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #f39c12, #e74c3c);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.baseline-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: #3498db;
+  z-index: 2;
+}
+
+.explanation-summary {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.explanation-summary p {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.explanation-summary .highlight {
+  color: #e74c3c;
+  font-weight: 600;
+}

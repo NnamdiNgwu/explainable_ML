@@ -99,7 +99,7 @@ def cascade_predict(event: Dict) -> Dict:
             }
         # else: escalate to Transformer
     except Exception as e:
-        # If RF fails, we log and fall through to Transformer as a safety net
+        # If RF fails, log and fall through to Transformer as a safety net
         logging.warning(f"RF stage failed, escalating to Transformer: {e}")
 
     # ---------------- Stage 2: Transformer + tau2 ----------------

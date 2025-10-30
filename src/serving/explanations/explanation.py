@@ -1,6 +1,6 @@
 """Explanation Blueprint for ML Model Serving - Detailed and Comparative Explanations
 """
-
+# from src.chain_of_reasoning.natural_language import generate_cot_reasoning
 from flask import Blueprint, request, jsonify, current_app
 import logging
 import numpy as np
@@ -54,8 +54,6 @@ def detailed_explanation():
         # Determine which model would be used
         X_tab = encode_tabular(evt)
         rf_proba = rf_predict_proba(models['rf'], X_tab)
-        # if rf_proba.max() >= models['tau']:
-        # else:
         rf_max = float(rf_proba.max())
 
         # Apply cascade with τ and τ2
@@ -188,7 +186,7 @@ def comprehensive_explanation():
             "transformer_analysis": transformer_analysis,
             "feature_alignment": alignment_analysis,
             "cascade_decision": cascade_decision,
-            "interpretation": _generate_interpretation(cascade_decision, alignment_analysis)
+            # "interpretation": _generate_interpretation(cascade_decision, alignment_analysis)
         })
         
     except Exception as e:
@@ -198,90 +196,61 @@ def comprehensive_explanation():
         return jsonify({"error": str(e)}), 500
 
 
-def _generate_interpretation(cascade_decision, alignment_analysis):
-    """Generate human-readable interpretation of the analysis."""
-    interpretation = []
+# @explanation_bp.route('/explain/waterfall', methods=['POST'])
+# def shap_waterfall():
+#     """Generate SHAP waterfall plot data."""
+#     evt = request.get_json()
+#     if not evt:
+#         return jsonify({"error": "No JSON payload"}), 400
     
-    # Prediction agreement
-    if cascade_decision["prediction_agreement"]:
-        interpretation.append("Both models agree on the prediction - high confidence result")
-    else:
-        interpretation.append(" Models disagree on prediction - requires careful review")
+#     # evt = handle_missing_features(evt)
     
-    # Feature alignment
-    alignment_score = alignment_analysis["alignment_score"]
-    if alignment_score > 0.7:
-        interpretation.append(f"Strong feature importance alignment ({alignment_score:.2f}) - models focus on similar patterns")
-    elif alignment_score > 0.3:
-        interpretation.append(f"Moderate feature alignment ({alignment_score:.2f}) - models partially agree on important features")
-    else:
-        interpretation.append(f"Low feature alignment ({alignment_score:.2f}) - models focus on different aspects")
-    
-    # Cascade decision
-    rf_confidence = cascade_decision.get("rf_confidence", 0.0)
-    threshold = cascade_decision.get("threshold", 0.8)
-    
-    if cascade_decision["would_use_rf"]:
-        interpretation.append(f"🔄 Cascade would use RF (confidence {cascade_decision['rf_confidence']:.3f} ≥ threshold {cascade_decision['threshold']:.3f})")
-    else:
-        interpretation.append(f"🔄 Cascade would use Transformer (RF confidence {cascade_decision['rf_confidence']:.3f} < threshold {cascade_decision['threshold']:.3f})")
-    
-    return interpretation
-
-
-@explanation_bp.route('/explain/waterfall', methods=['POST'])
-def shap_waterfall():
-    """Generate SHAP waterfall plot data."""
-    evt = request.get_json()
-    if not evt:
-        return jsonify({"error": "No JSON payload"}), 400
-    
-    # evt = handle_missing_features(evt)
-    
-    try:
-        models = current_app.ml_models
-        X_tab = encode_tabular(evt)
-        rf_proba = rf_predict_proba(models['rf'], X_tab)
-        prediction_class = int(rf_proba.argmax())
+#     try:
+#         models = current_app.ml_models
+#         X_tab = encode_tabular(evt)
+#         rf_proba = rf_predict_proba(models['rf'], X_tab)
+#         prediction_class = int(rf_proba.argmax())
         
-        # Get SHAP values
-        shap_values = _safe_get_shap_values(models['rf_explainer'], X_tab.reshape(1, -1), prediction_class)
-        logging.info(f"shap_values type: {type(shap_values)}, shape: {getattr(shap_values, 'shape', None)}")
+#         # Get SHAP values
+#         shap_values = _safe_get_shap_values(models['rf_explainer'], X_tab.reshape(1, -1), prediction_class)
+#         logging.info(f"shap_values type: {type(shap_values)}, shape: {getattr(shap_values, 'shape', None)}")
         
-        # Prepare waterfall data
-        waterfall_data = []
-        # cumulative_sum = shap_values
-        # Get baseline from explainer
-        expected_value = models['rf_explainer'].expected_value
-        # baseline = float(expected_value[prediction_class]) if isinstance(expected_value, np.ndarray) else float(expected_value)
-        baseline = _get_safe_baseline(models['rf_explainer'], prediction_class)
-        cumulative_sum = baseline
+#         # Prepare waterfall data
+#         waterfall_data = []
+#         # cumulative_sum = shap_values
+#         # Get baseline from explainer
+#         expected_value = models['rf_explainer'].expected_value
+#         # baseline = float(expected_value[prediction_class]) if isinstance(expected_value, np.ndarray) else float(expected_value)
+#         baseline = _get_safe_baseline(models['rf_explainer'], prediction_class)
+#         cumulative_sum = baseline
         
-        # Sort features by absolute SHAP value
-        feature_indices = np.abs(shap_values).argsort()[::-1][:10]
+#         # Sort features by absolute SHAP value
+#         feature_indices = np.abs(shap_values).argsort()[::-1][:10]
         
-        for i, feature_idx in enumerate(feature_indices):
-            feature_name = models['feature_names'][feature_idx]
-            shap_value = float(shap_values[feature_idx])
-            feature_value = evt.get(feature_name, 0)
+#         for i, feature_idx in enumerate(feature_indices):
+#             feature_name = models['feature_names'][feature_idx]
+#             shap_value = float(shap_values[feature_idx])
+#             feature_value = evt.get(feature_name, 0)
             
-            waterfall_data.append({
-                "feature": feature_name,
-                "feature_value": feature_value,
-                "shap_value": shap_value,
-                "cumulative": cumulative_sum + shap_value,
-                "rank": i + 1
-            })
-            cumulative_sum += shap_value
+#             waterfall_data.append({
+#                 "feature": feature_name,
+#                 "feature_value": feature_value,
+#                 "shap_value": shap_value,
+#                 "cumulative": cumulative_sum + shap_value,
+#                 "rank": i + 1
+#             })
+#             cumulative_sum += shap_value
         
-        return jsonify({
-            # "shap_values": float(shap_values),
-            "shap_values": shap_values.tolist(),
-            "final_prediction": float(cumulative_sum),
-            "prediction_class": prediction_class,
-            "waterfall_data": waterfall_data,
-            "model_output": float(rf_proba[prediction_class])
-        })
+#         return jsonify({
+#             # "shap_values": float(shap_values),
+#             "shap_values": shap_values.tolist(),
+#             "final_prediction": float(cumulative_sum),
+#             "prediction_class": prediction_class,
+#             "waterfall_data": waterfall_data,
+#             "model_output": float(rf_proba[prediction_class])
+#         })
         
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+

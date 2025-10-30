@@ -7,17 +7,6 @@ from typing import Dict, Tuple
 import logging
 
 
-# def encode_tabular(event: Dict) -> np.ndarray:
-#     """Return tabular vector ready for RF."""
-#     models = current_app.ml_models
-    
-#     features_order = models['feature_names']
-#     preprocessor = models['preprocessor']
-
-#     df = {k: [event.get(k)] for k in features_order} 
-#     X_raw = preprocessor.transform(pd.DataFrame.from_dict(df))
-#     return X_raw[0]  # return single row as 1D array
-
 def encode_tabular(event: Dict) -> np.ndarray:
     """Return *preprocessed* 1D vector ready for the RF estimator."""
     models = current_app.ml_models
@@ -103,7 +92,7 @@ def encode_sequence_semantic(event: Dict, feature_lists: dict, embed_maps: dict 
         logging.warning(f"Device conversion failed, using CPU: {e}")
         return cont.to('cpu'), cat_high.to('cpu'), cat_low.to('cpu')
 
-def encode_sequence_flat_for_shap(event: Dict, feature_lists=None, embed_maps=None) -> torch.Tensor: # np.ndarray: #torch.Tensor:
+def encode_sequence_flat_for_shap(event: Dict, feature_lists=None, embed_maps=None) -> torch.Tensor:
     """Convert event to flat tensor for SHAP compatibility."""
     # try to get flask context first, 
     if feature_lists is None or embed_maps is None:

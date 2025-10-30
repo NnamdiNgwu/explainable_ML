@@ -1,0 +1,5 @@
+megabytes_sent,hour,destination_domain,channel,first_time_destination,after_hours
+25.8,23,external.com,HTTP,true,true
+0.5,10,internal.com,SFTP,false,false
+100.2,2,dropbox.com,HTTP,true,true
+15.3,9,github.com,HTTP,false,false

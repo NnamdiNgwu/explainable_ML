@@ -1,0 +1,1 @@
+from src.serving.prediction.predictions import prediction_bp

@@ -1,0 +1,4 @@
+[
+  {"megabytes_sent":25.8,"hour":23,"destination_domain":"external.com","channel":"HTTP","first_time_destination":true,"after_hours":true},
+  {"megabytes_sent":0.5,"hour":10,"destination_domain":"internal.com","channel":"SFTP","first_time_destination":false,"after_hours":false}
+]

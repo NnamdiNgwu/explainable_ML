@@ -8,10 +8,6 @@ from ..models.cascade import rf_predict_proba, transformer_predict_proba
 from .shap_utils import _safe_get_shap_values
 from ..utils.feature_mapping import create_feature_vector_from_event
 
-
-
-import numpy as np
-
 def _select_class_vector(phi_rf_any, cls_idx: int) -> np.ndarray:
     """Return (F,) vector for the chosen class from SHAP outputs that may be list/(F,C)/(1,F)."""
     if isinstance(phi_rf_any, list):
@@ -103,8 +99,8 @@ def get_rf_explanation_data(evt, models):
         # Build dict(feature -> shap importance) for NLG
         shap_dict = dict(zip(models['feature_names'], shap_values))
         # shap_dict = dict(zip(rf_feat_names, shap_values))
-        brief_reason = generate_natural_language_explanation(shap_dict, evt)
-        logging.info(f"RF explanation generated: {brief_reason}")
+        # brief_reason = generate_natural_language_explanation(shap_dict, evt)
+        # logging.info(f"RF explanation generated: {brief_reason}")
 
         return {
             "model_used": "RandomForest",
@@ -116,7 +112,7 @@ def get_rf_explanation_data(evt, models):
                 "local_importance": _format_feature_importance(shap_values, models['feature_names']),
                 # "local_importance": _format_feature_importance(shap_values,rf_feat_names ),
                 "baseline": float(baseline),
-                "brief_reason": brief_reason,
+                # "brief_reason": brief_reason,
                 "top_features": [
                     {"feature": feat, "importance": round(imp, 4)}
                     for feat, imp in list(zip(models['feature_names'], shap_values))
@@ -420,7 +416,7 @@ def _get_transformer_shap_explanation(evt, models, cls):
         
         # NLG
         shap_dict = dict(zip(models['feature_names'], class_shap_values[:len(models['feature_names'])]))
-        brief_reason = generate_natural_language_explanation(shap_dict, evt)
+        # brief_reason = generate_natural_language_explanation(shap_dict, evt)
         baseline_value = explanation_result.get('expected_value', 0.0)
         
         return {
@@ -428,13 +424,13 @@ def _get_transformer_shap_explanation(evt, models, cls):
                 "local_importance": _format_feature_importance(class_shap_values[:len(models['feature_names'])], models['feature_names']), #(shap_values, models['feature_names']),
                 # "baseline": float(models['transformer_explainer'].shap_values[cls]) if hasattr(models['transformer_explainer'], 'shap_values') else 0.0,
                 # "baseline": float(explanation_result.get('expected_value', 0.0)), #float(models['transformer_explainer'].expected_value[cls]) if hasattr(models['transformer_explainer'], 'expected_value') and isinstance(models['transformer_explainer'].expected_value, np.ndarray) else 0.0,
-                "baseline": float(baseline_value) if np.isscalar(baseline_value) else float(baseline_value[0]) if hasattr(baseline_value, '__len__') else 0.0,
+                # "baseline": float(baseline_value) if np.isscalar(baseline_value) else float(baseline_value[0]) if hasattr(baseline_value, '__len__') else 0.0,
                 "total_effect": float(class_shap_values.sum()),
                 "strongest_features": _get_top_features(class_shap_values[:len(models['feature_names'])], models['feature_names'], top_k=5),
                 "method": explanation_result.get('method', 'rf_mapped_to_transformer'),
                 "mapping_confidence": explanation_result.get('mapping_confidence', 0.5),
                 "transformer_probability": explanation_result.get('transformer_probability', [0.5])[0],
-                "brief_reason": brief_reason
+                # "brief_reason": brief_reason
             }
         }
         
@@ -762,36 +758,4 @@ def _map_transformer_to_rf_features(evt, models, transformer_explanation):
         
     except Exception as e:
         return {"error": f"Feature mapping failed: {e}"}
-    
-# define suspicious domains
-# Define suspicious domain set (or load from config/DB)
-suspicious_domains = set([
-    "dropbox.com", "mega.nz", "we.tl", "anonfiles.com", "zippyshare.com",
-    "sendspace.com", "mediafire.com", "gofile.io"
-])
-
-RISK_TEMPLATES = {
-    "after_hours_large": "Large file transfer ({size}MB) outside business hours ({hour}:00)",
-    "suspicious_domain": "Data sent to potentially risky domain ({domain})",
-    "first_time_dest": "First-time transfer to new destination ({dest})",
-    "usb_weekend": "USB transfer on weekend - potential data exfiltration",
-    "competitor_domain": "Transfer to competitor organization ({domain}) - industrial espionage risk"
-}
-def generate_natural_language_explanation(shap_values, event_data):
-    """Convert technical SHAP output to SOC analyst language."""
-    explanations = []
-    
-    for feature, importance in shap_values.items():
-        if feature == "megabytes_sent" and importance > 0.2:
-            size_mb = event_data.get("megabytes_sent", 0)
-            user_avg = event_data.get("user_mean_upload_size", 0)
-            if size_mb > user_avg * 3:
-                explanations.append(f"unusually large file ({size_mb:.1f}MB vs typical {user_avg:.1f}MB)")
-        
-        elif feature == "destination_domain" and importance > 0.15:
-            domain = event_data.get("destination_domain")
-            if domain in suspicious_domains:
-                explanations.append(f"sent to unapproved cloud service ({domain})")
-    
-    return f"Flagged because: {', '.join(explanations)}"
-
+ 

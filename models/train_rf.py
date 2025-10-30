@@ -33,17 +33,7 @@ from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import classification_report, confusion_matrix
-from src.models.safe_smote import SafeSMOTE
-
-
-
-    
-    # def fit(self, X, y=None):
-    #     return self
-    
-    # def transform(self, X):
-    #     return X
-
+from models.safe_smote import SafeSMOTE
 
 # --------------------------- CLI -------------------------------
 def parse_args():
