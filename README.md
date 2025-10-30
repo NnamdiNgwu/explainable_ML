@@ -1,7 +1,7 @@
 
 # Cross Architecture Explanation Transfer
 
-![Cross Architecture Explanation Transfer](/explainable_architectural_transfer/image)
+![Cross Architecture Explanation Transfer](https://github.com/NnamdiNgwu/explainable/blob/main/image/TXM.jpg)
 
 
 Breaking deep neural network with TXM outputs.
@@ -15,12 +15,11 @@ Random Forest (RF) for fast gating on tabular events
 Transformer for sequence-aware escalation, optionally distilled from RF
 TXM (Transformer eXplanation Mapper) for consistent, cross-model explanations
 Tunable cascade thresholds 
-τ
+
 τ (RF gate) and 
 τ
 2
-τ 
-2
+
 ​	
   (Transformer gate)
 
@@ -110,16 +109,7 @@ TXM: deterministic RF→Transformer attribution mapping with probability-ratio s
 RF→Transformer Knowledge Distillation (KD): lift sequence model performance without architecture bloat; escalation-aware loss.
 Fidelity metrics for TXM (served & offline): sign_fidelity, rank_fidelity@k, prob_monotonicity.
 SOC-ready: plain-language rationales, latency/throughput instrumentation, explicit gates for tuning alert volume.
-
-Cascade Tuning and Serving
-Tune 
-τ
-τ and 
-τ
-2
-τ 
-2
-​	
+	
  
 python -m src.models.cascade --data_dir data_processed
 # writes cascade_config.json with tau, tau2, model paths, dims
@@ -127,11 +117,10 @@ python -m src.models.cascade --data_dir data_processed
 Cascade Tuning and Serving
 Tune 
 τ
-τ and 
+and 
 τ
 2
-τ 
-2
+
 ​	
 
 cd /explainable_architectural_transfer/src
@@ -145,6 +134,8 @@ pip install -r requirements.txt
 python -m flask --app src.serving.app run
 
 # To run a test
+python3 -m src.serving.app
+
  curl -X POST http://localhost:5000/api/v1/predict \
   -H "Content-Type: application/json" \
   -d '{"post_burst": 5,
