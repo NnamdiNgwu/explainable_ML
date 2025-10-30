@@ -169,14 +169,8 @@ explainable_ML/
 └── requirements.txt       # Python dependencies
 ```
 
-## License
+## Additional Information
 
-[Add your license information here]
+For more details about the project, model architecture, or deployment, please refer to the source code documentation in the `src/` directory.
 
-## Contributing
-
-[Add contribution guidelines here]
-
-## Contact
-
-[Add contact information here]
+For questions or issues, please use the GitHub issue tracker.
