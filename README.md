@@ -98,41 +98,8 @@ curl -X POST http://localhost:5000/api/v1/predict \
     "megabytes_sent": 25.8,                   # Total MB sent
     "uploads_last_24h": 12,                   # Upload count in last 24 hours
     "user_upload_count": 3,                   # User-specific upload count
-    "user_mean_upload_size": 18.5,            # User average upload size
-    "user_std_upload_size": 8.2,              # User upload size std deviation
-    "user_unique_destinations": 8,            # Number of unique destinations
-    "user_destination_count": 12,             # Total destination count
-    "attachment_count": 3,                    # Number of attachments
-    "bcc_count": 2,                           # BCC recipient count
-    "cc_count": 0,                            # CC recipient count
+    "user_mean_upload_size": 18.5,            # User average upload
     
-    "temporal_anomaly_score": 0.9,            # Time-based anomaly score
-    "volume_anomaly_score": 0.8,              # Volume-based anomaly score
-    "network_anomaly_score": 0.7,             # Network-based anomaly score
-    "composite_anomaly_score": 0.95,          # Overall anomaly score
-    "destination_novelty_score": 0.85,        # Novelty of destination
-    "decoy_risk_score": 0.6,                  # Decoy detection risk score
-    "days_since_decoy": 2,                    # Days since last decoy interaction
-    "size_hour_interaction": 0.9,             # Interaction: size × hour
-    "entropy_burst_interaction": 0.8,         # Interaction: entropy × burst
-    "upload_velocity": 0.95,                  # Upload speed metric
-    "domain_switching_rate": 0.7,             # Rate of domain changes
-    
-    "first_time_destination": true,           # First time accessing destination
-    "after_hours": true,                      # Event occurred after hours
-    "is_large_upload": true,                  # Upload exceeds size threshold
-    "rare_hour_flag": true,                   # Activity in unusual hour
-    "has_attachments": true,                  # Event has attachments
-    "is_from_user": true,                     # Originates from user account
-    "is_outlier_hour": true,                  # Hour is statistical outlier
-    "is_outlier_size": true,                  # Size is statistical outlier
-    "is_usb": true,                           # USB device involved
-    "is_weekend": true,                       # Event occurred on weekend
-    
-    "destination_domain": "suspicious.net",   # Target domain name
-    "user": "threat_user",                    # User identifier
-    "channel": "USB",                         # Communication channel
-    "from_domain": "company.com"              # Origin domain
   }'
 ```
 
