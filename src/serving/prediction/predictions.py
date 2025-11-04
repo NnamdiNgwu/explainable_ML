@@ -45,6 +45,8 @@ def _get_explanation(evt, result, current_app_context):
             "local_importance": []
         }
 
+
+
 prediction_bp = Blueprint('prediction', __name__, template_folder='templates')
 
 @prediction_bp.route("/")
@@ -138,7 +140,6 @@ def predict_batch():
                     "threshold": {"tau": current_app.ml_models['tau'], "tau2": current_app.ml_models['tau2']},
                     "Brief_Reason": "This is a brief reason for the prediction."
                 }
-                # "risk_description": RISK_DESCRIPTIONS.get(result["prediction"], "Unknown")
             })
         except Exception as e:
             logging.error(f"Batch prediction error at index {i}: {e}")
@@ -154,22 +155,3 @@ def predict_batch():
             "successful_predictions": len([r for r in results if "error" not in r])
         }
     })
-
-# @prediction_bp.route('/predict/sample', methods=['GET'])
-# def predict_sample():
-#     """Test prediction with sample data."""
-#     sample_event = get_sample_event()
-#     try:
-#         result = cascade_predict(sample_event)
-#         explanation = _get_explanation(sample_event, result, current_app.ml_models)
-#         return jsonify({
-#             "sample_input": sample_event,
-#             "prediction_result": result,
-#             "note": "This is a test prediction with sample data",
-#             "explanation": explanation
-#         })
-#     except Exception as e:
-#         return jsonify({
-#             "error": str(e),
-#             "sample_input": sample_event
-#         }), 500
