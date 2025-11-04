@@ -1,0 +1,31 @@
+version: '3.11'
+
+services:
+  explainable-ai-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: explainable-ai-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - CASCADE_CONFIG_PATH=/app/config/cascade_config.json
+      - MODEL_DIR=/app/data_processed
+    volumes:
+    # Mount only source code for hot reload
+    - ./src:/app/src
+    - ./config:/app/config
+    # Mount data_processed for model access (read-only to prevent accidental changes)
+    - ./data_processed:/app/data_processed:ro
+      # - .:/app
+    # Exclude unnecessary files from being mounted
+    - /app/__pycache__
+    restart: unless-stopped
+    command: flask run --host=0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
