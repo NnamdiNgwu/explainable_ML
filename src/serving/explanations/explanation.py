@@ -1,20 +1,18 @@
 """Explanation Blueprint for ML Model Serving - Detailed and Comparative Explanations
 """
-# from src.chain_of_reasoning.natural_language import generate_cot_reasoning
 from flask import Blueprint, request, jsonify, current_app
 import logging
 import numpy as np
-# from ..utils.validation import handle_missing_features
 from ..utils.shap_utils import _safe_get_shap_values
 from ..utils.explanation_utils import (
     get_rf_explanation_data,
     get_transformer_explanation_data,
-    _get_comprehensive_rf_analysis,
+    # _get_comprehensive_rf_analysis,
     _get_comprehensive_transformer_analysis,
     _analyze_feature_alignment,
     _get_safe_baseline
 )
-from ..models.encoders import encode_tabular  #, encode_sequence_semantic, encode_sequence_flat_for_shap
+from ..models.encoders import encode_tabular
 from ..models.cascade import rf_predict_proba, transformer_predict_proba
 from ..utils.tau_serving_decision_helper import load_cascade_config, cascade_decision
 from pathlib import Path
@@ -143,114 +141,5 @@ def compare_explanations():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-@explanation_bp.route('/explain/comprehensive', methods=['POST'])
-def comprehensive_explanation():
-    """Get all explanations for both models with feature mapping."""
-    evt = request.get_json()
-    if not evt:
-        return jsonify({"error": "No JSON payload"}), 400
-    
-    # evt = handle_missing_features(evt)
-    
-    try:
-        models = current_app.ml_models
-        
-        # Get RF explanation
-        X_tab = encode_tabular(evt)
-        rf_proba = rf_predict_proba(models['rf'], X_tab)
-        rf_analysis = _get_comprehensive_rf_analysis(evt, models, rf_proba)
-
-        rf_confidence = rf_analysis.get("confidence", 0.0)
-        # Get Transformer explanation with all methods
-        transformer_analysis = _get_comprehensive_transformer_analysis(evt, models)
-        transformer_confidence = transformer_analysis.get("confidence", 0.0)
-        
-        # Feature importance alignment
-        alignment_analysis = _analyze_feature_alignment(rf_analysis, transformer_analysis)
-        
-        # Cascade decision
-        cascade_decision = {
-            "would_use_rf": rf_analysis["confidence"] >= models['tau'],
-            "threshold": models['tau'],
-            "rf_confidence": rf_confidence, #rf_analysis["confidence"],
-            "transformer_confidence": transformer_analysis["confidence"],
-            "prediction_agreement": rf_analysis["prediction"] == transformer_analysis["prediction"],
-            "feature_alignment_score": alignment_analysis["alignment_score"]
-        }
-        
-        return jsonify({
-            "input_event": evt,
-            "rf_analysis": rf_analysis,
-            "transformer_analysis": transformer_analysis,
-            "feature_alignment": alignment_analysis,
-            "cascade_decision": cascade_decision,
-            # "interpretation": _generate_interpretation(cascade_decision, alignment_analysis)
-        })
-        
-    except Exception as e:
-        logging.error(f"Comprehensive explanation error: {e}")
-        import traceback
-        logging.error(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
-
-
-# @explanation_bp.route('/explain/waterfall', methods=['POST'])
-# def shap_waterfall():
-#     """Generate SHAP waterfall plot data."""
-#     evt = request.get_json()
-#     if not evt:
-#         return jsonify({"error": "No JSON payload"}), 400
-    
-#     # evt = handle_missing_features(evt)
-    
-#     try:
-#         models = current_app.ml_models
-#         X_tab = encode_tabular(evt)
-#         rf_proba = rf_predict_proba(models['rf'], X_tab)
-#         prediction_class = int(rf_proba.argmax())
-        
-#         # Get SHAP values
-#         shap_values = _safe_get_shap_values(models['rf_explainer'], X_tab.reshape(1, -1), prediction_class)
-#         logging.info(f"shap_values type: {type(shap_values)}, shape: {getattr(shap_values, 'shape', None)}")
-        
-#         # Prepare waterfall data
-#         waterfall_data = []
-#         # cumulative_sum = shap_values
-#         # Get baseline from explainer
-#         expected_value = models['rf_explainer'].expected_value
-#         # baseline = float(expected_value[prediction_class]) if isinstance(expected_value, np.ndarray) else float(expected_value)
-#         baseline = _get_safe_baseline(models['rf_explainer'], prediction_class)
-#         cumulative_sum = baseline
-        
-#         # Sort features by absolute SHAP value
-#         feature_indices = np.abs(shap_values).argsort()[::-1][:10]
-        
-#         for i, feature_idx in enumerate(feature_indices):
-#             feature_name = models['feature_names'][feature_idx]
-#             shap_value = float(shap_values[feature_idx])
-#             feature_value = evt.get(feature_name, 0)
-            
-#             waterfall_data.append({
-#                 "feature": feature_name,
-#                 "feature_value": feature_value,
-#                 "shap_value": shap_value,
-#                 "cumulative": cumulative_sum + shap_value,
-#                 "rank": i + 1
-#             })
-#             cumulative_sum += shap_value
-        
-#         return jsonify({
-#             # "shap_values": float(shap_values),
-#             "shap_values": shap_values.tolist(),
-#             "final_prediction": float(cumulative_sum),
-#             "prediction_class": prediction_class,
-#             "waterfall_data": waterfall_data,
-#             "model_output": float(rf_proba[prediction_class])
-#         })
-        
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
 
 

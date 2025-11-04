@@ -435,24 +435,6 @@ def _get_comprehensive_transformer_analysis(evt, models):
             analysis["explanations"]["captum"] = {"error": f"Captum explanation failed: {str(e)}"}
     return analysis
 
-def _get_comprehensive_rf_analysis(evt, models, rf_proba):
-    """Get comprehensive RF analysis."""
-    cls = int(rf_proba.argmax())
-    X_tab = encode_tabular(evt)
-    shap_values = _safe_get_shap_values(models['rf_explainer'], X_tab.reshape(1, -1), cls)
-    
-    return {
-        "model": "RandomForest",
-        "prediction": cls,
-        "confidence": float(rf_proba.max()),
-        "probabilities": rf_proba.tolist(),
-        "shap_analysis": {
-            "local_importance": _format_feature_importance(shap_values, models['feature_names']),
-            "baseline": _get_safe_baseline(models['rf_explainer'], cls),
-            "total_effect": float(shap_values.sum())
-        },
-       
-    }
 
 def _get_safe_baseline(explainer, cls):
     """Safely get baseline value from SHAP explainer."""
