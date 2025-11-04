@@ -134,6 +134,34 @@ pip install -r requirements.txt
 
 python -m flask --app src.serving.app run
 
+# Alternatively
+
+Quick Start
+# Build images
+./scripts/docker-build.sh
+
+# run development in another terminal
+./scripts/docker-dev.sh
+
+# Stop all
+./scripts/docker-stop.sh
+
+
+Verify Everything Works
+# Check if container is running
+docker ps
+
+# Check health
+curl http://localhost:5000/api/v1/health
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+
+
+
 # To run a test
 python3 -m src.serving.app
 

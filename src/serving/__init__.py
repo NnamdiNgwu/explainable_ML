@@ -13,6 +13,7 @@ from .config.settings import config as Config
 from .models.model_loader import ModelLoader
 from .prediction.predictions import prediction_bp
 from .explanations.explanation import explanation_bp
+from .health_check.health_checks import health_bp
 
 def create_app(config_name='None'):
     """Application factory pattern."""
@@ -44,7 +45,7 @@ def create_app(config_name='None'):
         raise
     
     # Register blueprints
-    # app.register_blueprint(health_bp, url_prefix='/api/v1')
+    app.register_blueprint(health_bp, url_prefix='/api/v1/health')
     app.register_blueprint(prediction_bp, url_prefix='/api/v1')
     app.register_blueprint(explanation_bp, url_prefix='/api/v1')
     
@@ -65,13 +66,5 @@ def create_app(config_name='None'):
             "error": "Internal server error",
             "message": str(error) if app.debug else "An unexpected error occurred"
         }), 500
-    
-    # Health check
-    @app.route('/health', methods=['GET'])
-    def health():
-        return jsonify({
-            "status": "healthy",
-            "models_loaded": bool(app.ml_models)
-        }), 200
     
     return app

@@ -1,0 +1,1 @@
+from serving.health_check.health_checks import health_bp
