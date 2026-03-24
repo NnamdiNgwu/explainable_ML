@@ -1,0 +1,9 @@
+{
+  "rf_model_path": "data_processed/rf_model.joblib",
+  "transformer_model_path": "data_processed/cybersecurity_transformer.pt",
+  "tau": 0.805,
+  "tau2": 0.92,
+  "cont_dim": 36,
+  "high_cat_dim": 1,
+  "low_cat_dim": 3
+}

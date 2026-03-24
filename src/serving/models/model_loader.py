@@ -12,16 +12,29 @@ from models.safe_smote import *  # noqa: F401,F403
 from models.cybersecurity_transformer import build_cybersecurity_transformer_from_maps as bctm
 from models.safe_smote import SafeSMOTE
 from src.serving.utils.feature_mapping import TransformerExplanationMapper
-from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.pipeline import Pipeline as SkPipeline
+
+# imblearn may not be importable if version-incompatible with scikit-learn.
+# Only needed for isinstance check when extracting RF from imblearn pipelines.
+try:
+    from imblearn.pipeline import Pipeline as ImbPipeline
+except ImportError:
+    ImbPipeline = None
 
 
 def _extract_rf_estimator(obj):
     """Return (bare_rf, rf_pipeline_or_None)."""
     if isinstance(obj, RandomForestClassifier):
         return obj, None
-    if isinstance(obj, (ImbPipeline, SkPipeline)):
+    # Check for sklearn or imblearn Pipeline
+    _pipeline_types = (SkPipeline,) if ImbPipeline is None else (ImbPipeline, SkPipeline)
+    if isinstance(obj, _pipeline_types):
         last = obj.steps[-1][1] if obj.steps else None
+        if isinstance(last, RandomForestClassifier):
+            return last, obj
+    # Duck-type fallback: any object with .steps whose last step is an RF
+    if hasattr(obj, 'steps') and obj.steps:
+        last = obj.steps[-1][1]
         if isinstance(last, RandomForestClassifier):
             return last, obj
     return None, None
