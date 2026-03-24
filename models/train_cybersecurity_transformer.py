@@ -23,14 +23,7 @@ import matplotlib.pyplot as plt
 from models.cybersecurity_transformer import build_cybersecurity_transformer_from_maps
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.base import BaseEstimator, ClassifierMixin
-# from torch.utils.data import WeightedRandomSampler
 
-# def build_class_balanced_sampler(y: torch.Tensor) -> WeightedRandomSampler:
-#     """Create a sampler with inverse-frequency weights for class balance."""
-#     classes, counts = torch.unique(y, return_counts=True)
-#     freq = {int(c): float(cnt) for c, cnt in zip(classes, counts)}
-#     weights = torch.tensor([1.0 / freq[int(label)] for label in y], dtype=torch.float)
-#     return WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
 
 class FocalLoss(nn.Module):
     """Focal Loss for handling class imbalance."""
@@ -39,7 +32,6 @@ class FocalLoss(nn.Module):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
-        # self.reduction = reduction
     
     def forward(self, inputs, targets):
         ce_loss =  F.cross_entropy(inputs, targets, reduction='none')
@@ -118,12 +110,6 @@ def train_transformer(model, train_loader, val_loader, epochs, lr, device, num_c
     optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
     
-    # Use class weights to handle imbalance
-    # class_weights = torch.tensor([1.0, 12.0]).to(device)  # Weight classes based on rarity
-    # criterion = nn.CrossEntropyLoss(weight=class_weights)
-    # optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
-
     early_stopping = EarlyStopping(patience=15, min_delta=0.01, routine_threshold=0.3)
     
     history = []
@@ -160,8 +146,6 @@ def train_transformer(model, train_loader, val_loader, epochs, lr, device, num_c
             train_loss += loss.item()
             train_predictions.extend(logits.argmax(1).cpu().numpy())
             train_targets.extend(y_batch.cpu().numpy())
-
-        # scheduler.step()
 
         # Validation
         model.eval()
@@ -236,10 +220,8 @@ def main():
     parser.add_argument('--batch', type=int, default=16)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--device', default='cpu')
-    # parser.add_argument("--expl_vocab", type=int, default=0)
     args = parser.parse_args()
-    
-    # device = torch.device(args.device)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
@@ -330,7 +312,7 @@ def main():
     print(f"Test F1 Score: {test_f1:.4f}")
     print("\nDetailed Classification Report:")
     print(classification_report(test_targets, test_predictions, 
-                              target_names=['Low','Medium','High'])) #['Minor', 'Major', 'Critical']))
+                              target_names=['Low', 'Medium', 'High']))
     
     # Save model and history
     torch.save(model.state_dict(), args.data_dir / 'cybersecurity_transformer.pt')

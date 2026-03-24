@@ -89,26 +89,13 @@ class CybersecurityTransformer(nn.Module):
         # Classification head
         self.classifier = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
-            # nn.BatchNorm1d(d_model // 2), #
             nn.ReLU(),
-            nn.Dropout(dropout * 1.5), #
-            #nn.Dropout(dropout * 1.5), #
-            nn.Linear(d_model // 2, d_model // 4), #
-            # nn.BatchNorm1d(d_model // 4), #
+            nn.Dropout(dropout * 1.5),
+            nn.Linear(d_model // 2, d_model // 4),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 4, num_classes) #
+            nn.Linear(d_model // 4, num_classes),
         )
-        
-    #     # Add weight decay regularization term
-    #     self.weight_decay = 1e-4
-    
-    # def get_l2_loss(self):
-    #     """Calculate L2 regularization loss for all parameters."""
-    #     l2_loss = 0.0
-    #     for param in self.parameters():
-    #         l2_loss += torch.norm(param, p=2)
-    #     return self.l2_lamba * l2_loss
 
         # Initialize weights
         self.apply(self._init_weights)
@@ -200,11 +187,11 @@ def build_cybersecurity_transformer_from_maps(embed_maps: dict, continuous_dim: 
         cat_dims=cat_dims,
         cat_emb_dims=cat_emb_dims,
         num_classes=num_classes,
-        d_model= 64, #128,  # Use 64 for short sequences
-        nhead=8, #8, #4,      # Increased heads for finer interactions
-        num_layers=4, #4, #2, # Depth sufficient for days-apart events
+        d_model=64,
+        nhead=8,
+        num_layers=4,
         max_len=50,
-        dropout=0.3 #0.3 #0.1 # Sronger regularization to curb overfitting
+        dropout=0.3,
     )
     
     return model

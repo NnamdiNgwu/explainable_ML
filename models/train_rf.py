@@ -53,14 +53,11 @@ def load_tabular(data_dir: pathlib.Path):
     X_test  = np.load(data_dir / "X_test_tab.npy", allow_pickle=True)
     y_train = np.load(data_dir / "y_train.npy", allow_pickle=True)
 
-    y_test  = np.load(data_dir / "y_test.npy", allow_pickle=True) # not used in training, but for evaluation
-    # for i in range(X_train.shape[1]):
-    #     print(f"Col {i} unique:", np.unique(X_train[:, i]))
+    y_test  = np.load(data_dir / "y_test.npy", allow_pickle=True)
 
     X_train = np.nan_to_num(X_train, nan=0.0)
     X_test = np.nan_to_num(X_test, nan=0.0)
 
-    # Ensure numeric type
     X_train = np.array(X_train, dtype=np.float32)
     X_test = np.array(X_test, dtype=np.float32)
 
@@ -69,17 +66,7 @@ def load_tabular(data_dir: pathlib.Path):
     assert not np.isnan(y_train).any(), "NaNs remain in y_train!"
     assert not np.isnan(y_test).any(), "NaNs remain in y_test!"
 
-    for i in range(X_train.shape[1]):
-        print(f"Col {i} unique (as str):", set(str(v) for v in X_train[:, i]))
-    
-
-    print("NaNs in X_train:", np.isnan(X_train.astype(float)).sum())
-    print("NaNs in y_train:", np.isnan(y_train.astype(float)).sum())
-    print("Any NaNs in X_train?", np.any(np.isnan(X_train.astype(float))))
-    print("Any NaNs in y_train?", np.any(np.isnan(y_train.astype(float))))
-
-    print("x_train shape:", X_train.shape)
-    print("y_train shape:", y_train.shape)
+    print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}")
 
     # SMOTENC: mark categorical indices (booleans+low+high one-hots at the *end* of matrix)
     preprocessors = joblib.load(data_dir / "preprocessors.pkl")
@@ -100,7 +87,6 @@ def build_pipeline(cat_mask, n_jobs):
     rf = RandomForestClassifier(random_state=42, n_jobs=n_jobs, 
                                 n_estimators=200,
                                 class_weight={0:1, 1:6, 2:12})
-                                # class_weight={0:1, 1:12})
     
     pipeline = Pipeline([
         ("smote", smote),
@@ -151,7 +137,7 @@ def main():
 
     validate_no_leakage(X_train, X_test, y_train, y_test)
 
-    pipe = build_pipeline(cat_mask, args.n_jobs)#, y_train)
+    pipe = build_pipeline(cat_mask, args.n_jobs)
     # --- Cross-validation ---
     print("=== Stratified 5-Fold Cross-Validation ===")
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -171,7 +157,7 @@ def main():
             'clf__max_features': ['sqrt', 'log2'],
             'clf__class_weight': [{0:1, 1:6, 2:12}, "balanced"],
         }
-        min_class_count = np.bincount(y_train).min() #
+        min_class_count = np.bincount(y_train).min()
         cv = StratifiedKFold(n_splits=min(5, min_class_count), shuffle=True, random_state=42)
         grid_search = GridSearchCV(pipe, param_grid, cv=cv, n_jobs=args.n_jobs,
                                    scoring='f1_macro', verbose=2, refit=True)
@@ -181,15 +167,12 @@ def main():
         print(f"Best params: {grid_search.best_params_}")
         print(f"Best CV F1 Macro: {grid_search.best_score_:.4f}")
     else:
-        print("NaNs in X_train:", np.isnan(X_train).sum())
         # Fixed hyper-parameters
         best_model = pipe.fit(X_train, y_train)
 
     joblib.dump(best_model, args.data_dir / "rf_model.joblib")
     print(f"[✓] Saved RandomForest model to {args.data_dir / 'rf_model.joblib'}")
     print(f"[✓] Model score: {best_model.score(X_train, y_train):.4f} (train)")
-    # print(f"[✓] Model score: {best_model.score(X_train, y_train):.4f} (test)")
-    # print(f"[✓] Model score: {best_model.score(X_train, y_train):.4f} (validation)")
     print(f"[✓] Model score: {best_model.score(X_test, y_test):.4f} (test)")
 
     # --- Add this block to check class balance and detailed metrics ---

@@ -64,7 +64,7 @@ def _fallback_behavioral(df, is_training, state):
         state['scaler'] = StandardScaler()
     if is_training:
         Xs = state['scaler'].fit_transform(X)
-        iso = IsolationForest(n_estimators=100, random_state=0, contamination=0.02)
+        iso = IsolationForest(n_estimators=100, random_state=42, contamination=0.02)
         scores = -iso.fit_predict(Xs)
         state['iso'] = iso
     else:
