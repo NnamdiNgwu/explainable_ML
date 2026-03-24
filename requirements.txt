@@ -4,7 +4,7 @@ torchvision >=0.15.1
 scikit-learn ==1.6.1
 pandas >=2.1.0
 numpy >=2.1.0
-imbalanced-learn >=0.11.0
+imbalanced-learn >=0.13.0  # requires >=0.13 for scikit-learn 1.6 compatibility
 
 # Visualization 
 matplotlib >=3.5.0
