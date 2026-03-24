@@ -1,28 +1,20 @@
 #!/usr/bin/env python3
 """cascade.py - build, tune, and serialize the RF -> Transformer cascade
 
-The cascade follows the rule:
-    if max(P_RF) >= τ  -> use RF class
-    else              -> fall through to Cybersecurity Transformer class
+Two-stage cascade with two thresholds:
+    Stage 1: if max(P_RF) < τ   -> return Benign immediately (no Transformer)
+    Stage 2: if P_Trans >= τ₂   -> Malicious
+             else               -> Benign
 
-• Finds the ROC knee on validation data to choose τ (default 0.60).
-• Persists the threshold plus model paths in `cascade_config.json`.
-• Provides `cascade_predict` for downstream serving code.
-
-The cascade follows the rule:
-    if max(P_RF) < τ   -> return Benign immediately (no Transformer)
-    else               -> escalate to Cybersecurity Transformer and decide via τ₂
-
-• Finds τ on validation (PR–F1 with RF max prob).
-• Optionally finds τ₂ on RF-escalated validation (PR–F1 with Transformer prob).
-• Persists thresholds plus model paths in `cascade_config.json`.
-• Provides helpers for downstream serving.
+• τ  tuned on full validation set (PR–F1 with RF max prob).
+• τ₂ tuned on RF-escalated subset only (PR–F1 with Transformer prob).
+• Persists both thresholds plus model paths in `cascade_config.json`.
 
 Run after both `train_rf.py` and `train_cybersecurity_transformer.py` have produced
    • rf_model.joblib
-   •  embedding_maps.json
-   python -m src.models.cascade --data_dir data_processed
+   • embedding_maps.json
 
+   python -m models.cascade --data_dir data_processed
 """
 
 from __future__ import annotations
@@ -31,7 +23,7 @@ import numpy as np, joblib, torch
 from sklearn.metrics import precision_recall_curve, f1_score
 from sklearn.model_selection import train_test_split
 from models.safe_smote import SafeSMOTE
-from models.to_be_submitted.cybersecurity_transformer3 import build_cybersecurity_transformer_from_maps
+from models.cybersecurity_transformer import build_cybersecurity_transformer_from_maps
 
 
 # ---------------------------- load artefacts ----------------------------

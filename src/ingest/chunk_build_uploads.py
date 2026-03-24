@@ -67,7 +67,7 @@ from src.utils.updated_feature_engineering import (
 # from src.utils.correlation_utils import prepare_corr_frame as _prepare_corr_frame
 from src.utils.ground_truth_labeling import GroundTruthLabeler
 from sklearn.model_selection import train_test_split
-from src.utils.dynamic_date_cutt_off import compute_dynamic_cutoff
+from src.utils.dynamic_date_cutoff import compute_dynamic_cutoff
 from src.ingest.logon_processed import merge_logon_with_uploads, process_logon_chunks_leak_free
 
 def load_csv_chunked(path, parse_dates=("date",), chunksize=2000_000):
