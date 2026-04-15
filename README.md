@@ -276,21 +276,6 @@ Full list: [requirements.txt](requirements.txt)
 
 ---
 
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@software{ngwu2025txm,
-  author    = {Ngwu, Nnamdi},
-  title     = {Cross-Model Explanation Transfer for Cascade Insider Threat Detection},
-  year      = {2025},
-  url       = {https://github.com/NnamdiNgwu/explainable_ML}
-}
-```
-
----
-
 ## License
 
 This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
